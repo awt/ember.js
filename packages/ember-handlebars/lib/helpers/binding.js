@@ -472,15 +472,14 @@ EmberHandlebars.registerHelper('bindAttr', function(options) {
 
     var value = (path === 'this') ? normalized.root : handlebarsGet(ctx, path, options),
         type = Ember.typeOf(value);
-
-    Ember.assert(fmt("Attributes must be numbers, strings or booleans, not %@", [value]), value === null || value === undefined || type === 'number' || type === 'string' || type === 'boolean');
+        Ember.assert(fmt("Attributes must be numbers, strings, instances of SafeString or booleans, not %@", [value]), value === null || value === undefined || value instanceof Handlebars.SafeString || type === 'number' || type === 'string' || type === 'boolean');
 
     var observer, invoker;
 
     observer = function observer() {
       var result = handlebarsGet(ctx, path, options);
 
-      Ember.assert(fmt("Attributes must be numbers, strings or booleans, not %@", [result]), result === null || result === undefined || typeof result === 'number' || typeof result === 'string' || typeof result === 'boolean');
+      Ember.assert(fmt("Attributes must be numbers, strings or booleans, not %@", [result]), result === null || result === undefined || result instanceof Handlebars.SafeString || typeof result === 'number' || typeof result === 'string' || typeof result === 'boolean');
 
       var elem = view.$("[data-bindattr-" + dataId + "='" + dataId + "']");
 
@@ -508,7 +507,12 @@ EmberHandlebars.registerHelper('bindAttr', function(options) {
     // if this changes, also change the logic in ember-views/lib/views/view.js
     if ((type === 'string' || (type === 'number' && !isNaN(value)))) {
       ret.push(attr + '="' + Handlebars.Utils.escapeExpression(value) + '"');
-    } else if (value && type === 'boolean') {
+    } 
+    else if (value && type === 'object' && value instanceof Handlebars.SafeString) {
+      // The developer has explicitly requested that this string not be escaped
+      ret.push(attr + '="' + value.toString() + '"');
+    }
+    else if (value && type === 'boolean') {
       // The developer controls the attr name, so it should always be safe
       ret.push(attr + '="' + attr + '"');
     }

@@ -2434,7 +2434,7 @@ Ember.View.applyAttributeBindings = function(elem, name, value) {
   var type = Ember.typeOf(value);
 
   // if this changes, also change the logic in ember-handlebars/lib/helpers/binding.js
-  if (name !== 'value' && (type === 'string' || (type === 'number' && !isNaN(value)))) {
+  if (name !== 'value' && (type === 'string' || (type === 'number' && !isNaN(value)) || (type === 'object' && value instanceof Handlebars.SafeString))) {
     if (value !== elem.attr(name)) {
       elem.attr(name, value);
     }

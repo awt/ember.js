@@ -1340,6 +1340,29 @@ test("{{view}} should be able to bind class names to truthy or falsy properties"
   equal(view.$('.is-falsy').length, 1, "sets class name to falsy value");
 });
 
+test("should not escape values wrapped with Handlebars.SafeString", function(){
+  var template = Ember.Handlebars.compile('<img {{bindAttr src="view.content.url" alt="view.content.title"}}>');
+
+  view = Ember.View.create({
+    template: template,
+    content: Ember.Object.createWithMixins({
+      url: "http://www.emberjs.com/assets/images/logo.png",
+      title: new Ember.Handlebars.SafeString("&#x54;")
+    })
+  });
+
+  appendView();
+
+  equal(view.$('img').attr('alt'), "T", "sets alt attribute unescaped");
+
+  Ember.run(function() {
+    set(view, 'content.title', new Ember.Handlebars.SafeString("&#x55;"));
+  });
+
+  equal(view.$('img').attr('alt'), "U", "updates alt attribute to unescaped value when content's title attribute changes");
+
+});
+
 test("should be able to bind element attributes using {{bindAttr}}", function() {
   var template = Ember.Handlebars.compile('<img {{bindAttr src="view.content.url" alt="view.content.title"}}>');
 
